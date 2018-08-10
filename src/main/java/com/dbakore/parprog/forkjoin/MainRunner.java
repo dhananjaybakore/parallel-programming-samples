@@ -13,16 +13,19 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class MainRunner implements CommandLineRunner{
-    private static ForkJoinPool myPool = new ForkJoinPool(6);
+    private static ForkJoinPool myPool = new ForkJoinPool(4);
+
     private static final Logger log = LoggerFactory.getLogger(MainRunner.class);
     private static final int COUNT = 80000000;
+    private static final String dataFile = "src/main/resources/data/numbers";
 
 
 
     @Override
     public void run(String... args) throws Exception {
-        // generateSampleInputData();
+        //generateSampleInputData();
 
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism","4");
         double [] inputarr = getInputArray();
         long startTimeAsync = System.nanoTime();
         double ansAsync = parallelSumAsync(inputarr);
@@ -41,7 +44,7 @@ public class MainRunner implements CommandLineRunner{
         String line="";
         double[] arr = new double[COUNT];
         int i=0;
-        try(BufferedReader br = new BufferedReader(new FileReader("numbers.txt"))){
+        try(BufferedReader br = new BufferedReader(new FileReader(dataFile))){
             while ((line = br.readLine()) != null) {
                 arr[i]=Double.parseDouble(line);
                 i++;
@@ -55,7 +58,7 @@ public class MainRunner implements CommandLineRunner{
     }
 
     private static void generateSampleInputData() {
-        try (FileWriter writer = new FileWriter(new File("numbers.txt"))){
+        try (FileWriter writer = new FileWriter(new File(dataFile))){
             for(int i=0; i< COUNT; i++){
                 Integer number = ThreadLocalRandom.current().nextInt(1,100);
                 writer.write(number.toString());
@@ -75,14 +78,14 @@ public class MainRunner implements CommandLineRunner{
 
     private static double parallelSumAsync(double[] arr){
         ParallelInverseSum parallelSumTask = new ParallelInverseSum(arr,0,arr.length);
-        myPool.invoke(parallelSumTask);
-        //ForkJoinPool.commonPool().invoke(parallelSumTask);
+        //myPool.invoke(parallelSumTask);
+        ForkJoinPool.commonPool().invoke(parallelSumTask);
         return parallelSumTask.getAns();
     }
 
     private static double parallelSum(double [] arr){
         double ans=0;
-        for(int i =0; i< arr.length; i++){
+        for(int i =0; i< arr.length; ++i){
             ans+= 1/arr[i];
         }
         return ans;

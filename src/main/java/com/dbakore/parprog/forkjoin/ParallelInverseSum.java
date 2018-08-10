@@ -3,7 +3,7 @@ package com.dbakore.parprog.forkjoin;
 import java.util.concurrent.RecursiveAction;
 
 public class ParallelInverseSum extends RecursiveAction {
-    private static int SEQ_THRESHOLD = 1000000;
+    private static int SEQ_THRESHOLD = 1000;
 
     private int low;
     private int high;
@@ -20,7 +20,8 @@ public class ParallelInverseSum extends RecursiveAction {
     protected void compute() {
         // If seq threshold process else divide and conquer and split
         if(high-low <= SEQ_THRESHOLD){
-            for(int i=low; i< high ; i++){
+            for(int i=low; i< high ; ++i){
+
                 ans += 1/input[i];
             }
         }else{
